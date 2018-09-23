@@ -1,0 +1,26 @@
+.schedule {  }
+
+/* Dates */
+.schedule .schedule-date { width: 170px; }
+.schedule .schedule-date .dayofmonth {
+  width: 40px;
+  font-size: 36px;
+  line-height: 36px;
+  float: left;
+  text-align: right;
+  margin-right: 10px; 
+}
+.schedule .schedule-date .shortdate {
+  font-size: 0.75em; 
+}
+
+
+/* Times */
+.schedule .schedule-time { width: 140px; } 
+
+
+/* Hours */
+.schedule .schedule-comment {  } 
+
+@media (max-width: 767px) {
+}
