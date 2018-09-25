@@ -19,6 +19,8 @@
   <div class="container">
 
     <h2>Schedule</h2>
+    <a href="/?month={{ prev_month.strftime("%Y.%m") }}" class="btn btn-default">Previus month</a>
+    <a href="/?month={{ next_month.strftime("%Y.%m") }}" class="btn btn-default">Next month</a>
     <hr />
 
     <form method="post" action="/schedule">
@@ -31,26 +33,23 @@
                 <th>Date</th>
                 <th>From</th>
                 <th>To</th>
-                <th>Hours</th>
                 <th>Comment</th>
               </tr>
             </thead>
             <tbody>
               {% for date in dates %}
-              <tr id="{{ date.strftime("%Y-%m-%d") }}">
+              <tr class="time-entry">
                 <td class="schedule-date" class="active" rowspan="1">
                   <div class="dayofmonth">{{ date.day }}</div>
                   <div class="dayofweek">{{ date.strftime("%A") }}</div>
                   <div class="shortdate text-muted">{{ date.strftime("%B") }}, {{ date.year }}</div>
+                  <input name="date" type="hidden" class="form-control" value="{{ date.strftime("%Y-%m-%d") }}">
                 </td>
                 <td class="schedule-time">
                   <input name="time-from" type="time" class="form-control" value="08:00">
                 </td>
                 <td class="schedule-time">
                   <input name="time-to" type="time" class="form-control time-to" value="16:00">
-                </td>
-                <td class="schedule-time">
-                  <input name="hours" type="time" class="form-control" value="08:00" readonly>
                 </td>
                 <td class="schedule-comment">
                 </td>

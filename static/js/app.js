@@ -1,3 +1,16 @@
+function getFormData() {
+    var data = {};
+    $("tr.time-entry").each(function() {
+        var date = $(this).find("input[name='date']").val();
+        var timeFrom = $(this).find("input[name='time-from']").val();
+        var timeTo = $(this).find("input[name='time-to']").val();
+        data[date] = {"from": timeFrom, "to": timeTo}
+        console.log(date);
+    });
+    return data;
+}
+
+
 $(document).ready(function() {
     $("form").submit(function(e){
         var form = $(this);
@@ -5,17 +18,7 @@ $(document).ready(function() {
             url   : form.attr("action"),
             type  : form.attr("method"),
             contentType: 'application/json;charset=UTF-8',
-            // TODO: schedule serialization
-            data  : JSON.stringify({ 
-                "2018-09-01": {
-                    "from": "8:00",
-                    "to": "16:00"
-                },
-                "2018-09-02": {
-                    "from": "9:00",
-                    "to": "17:00"
-                },
-            }), 
+            data  : JSON.stringify(getFormData()), 
             success: function(response){
                 alert(response);
             }

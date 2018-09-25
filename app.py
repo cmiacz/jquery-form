@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-
+from dateutil import relativedelta
 from calendar import monthrange
 from flask import Flask, request, render_template
 
@@ -17,12 +17,17 @@ def get_dates(month):
 
 @app.route("/")
 def root():
-    month = request.args.get("month")
     try:
-        month = datetime.datetime.strptime(month, "%Y.%m")
+        current_month = datetime.datetime.strptime(request.args.get("month"), "%Y.%m")
     except (TypeError, ValueError):
-        month = datetime.datetime.today()
-    return render_template("index.html", dates=get_dates(month))
+        current_month = datetime.datetime.today()
+
+    return render_template(
+        "index.html",
+        dates=get_dates(current_month),
+        prev_month=current_month - relativedelta.relativedelta(months=1),
+        next_month=current_month + relativedelta.relativedelta(months=1),
+    )
 
 
 @app.route("/<path:path>")
@@ -32,7 +37,9 @@ def static_proxy(path):
 
 @app.route('/schedule', methods=['POST'])
 def transcribe():
-    print(request.json)
+    data = request.json
+    for date, time in data.items():
+        print("{}: {} - {}".format(date, time["from"], time["to"]))
     return "OK"
 
 
