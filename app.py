@@ -26,9 +26,7 @@ def get_month_dates():
 class HiddenDateField(HiddenField):
 
     def process_formdata(self, valuelist):
-        print(valuelist)
         self.data = datetime.datetime.strptime(valuelist[0], "%Y-%m-%d")
-        print(self.data)
 
 
 class TimeEntryForm(FlaskForm):
@@ -43,22 +41,26 @@ class ScheduleForm(FlaskForm):
     time_entries = FieldList(FormField(TimeEntryForm))
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def root():
     form = ScheduleForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            for time_entry in form.data["time_entries"]:
-                print("{date}: {time_from} - {time_to}".format(**time_entry))
-    else:
-        for date in get_month_dates():
-            form.time_entries.append_entry({
-                "date": date,
-                "time_from": datetime.time(hour=8),
-                "time_to": datetime.time(hour=16)
-            })
-
+    for date in get_month_dates():
+        form.time_entries.append_entry({
+            "date": date,
+            "time_from": datetime.time(hour=8),
+            "time_to": datetime.time(hour=16)
+        })
     return render_template("index.html", form=form)
+
+
+@app.route("/schedule", methods=["POST"])
+def post_schedule():
+    form = ScheduleForm()
+    if form.validate_on_submit():
+        for time_entry in form.data["time_entries"]:
+            print("{date}: {time_from} - {time_to}".format(**time_entry))
+        return render_template("result.html", result="Success")
+    return render_template("result.html", result="Failure")
 
 
 @app.route("/<path:path>")
