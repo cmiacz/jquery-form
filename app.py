@@ -1,46 +1,69 @@
 # -*- coding: utf-8 -*-
 import datetime
-from dateutil import relativedelta
 from calendar import monthrange
 from flask import Flask, request, render_template
+
+from flask_wtf import FlaskForm
+from wtforms import FieldList, FormField, HiddenField, DateTimeField
 
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
+app.config["WTF_CSRF_ENABLED"] = False
 
 
-def get_dates(month):
+def get_month_dates():
+    try:
+        month = datetime.datetime.strptime(request.args.get("month"), "%Y.%m")
+    except (TypeError, ValueError):
+        month = datetime.datetime.today()
+
     last = monthrange(month.year, month.month)[1]
     for day in range(1, last + 1):
         yield datetime.date(month.year, month.month, day)
 
 
-@app.route("/")
-def root():
-    try:
-        current_month = datetime.datetime.strptime(request.args.get("month"), "%Y.%m")
-    except (TypeError, ValueError):
-        current_month = datetime.datetime.today()
+class HiddenDateField(HiddenField):
 
-    return render_template(
-        "index.html",
-        dates=get_dates(current_month),
-        prev_month=current_month - relativedelta.relativedelta(months=1),
-        next_month=current_month + relativedelta.relativedelta(months=1),
-    )
+    def process_formdata(self, valuelist):
+        print(valuelist)
+        self.data = datetime.datetime.strptime(valuelist[0], "%Y-%m-%d")
+        print(self.data)
+
+
+class TimeEntryForm(FlaskForm):
+
+    date = HiddenDateField("date")
+    time_from = DateTimeField("from", format="%H:%M")
+    time_to = DateTimeField("to", format="%H:%M")
+
+
+class ScheduleForm(FlaskForm):
+
+    time_entries = FieldList(FormField(TimeEntryForm))
+
+
+@app.route("/", methods=["GET", "POST"])
+def root():
+    form = ScheduleForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            for time_entry in form.data["time_entries"]:
+                print("{date}: {time_from} - {time_to}".format(**time_entry))
+    else:
+        for date in get_month_dates():
+            form.time_entries.append_entry({
+                "date": date,
+                "time_from": datetime.time(hour=8),
+                "time_to": datetime.time(hour=16)
+            })
+
+    return render_template("index.html", form=form)
 
 
 @app.route("/<path:path>")
 def static_proxy(path):
     return app.send_static_file(path)
-
-
-@app.route('/schedule', methods=['POST'])
-def transcribe():
-    data = request.json
-    for date, time in data.items():
-        print("{}: {} - {}".format(date, time["from"], time["to"]))
-    return "OK"
 
 
 if __name__ == "__main__":
