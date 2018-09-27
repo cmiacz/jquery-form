@@ -36,7 +36,7 @@ def static_proxy(path):
 
 
 @app.route('/schedule', methods=['POST'])
-def transcribe():
+def post_schedule():
     data = request.json
     for date, time in data.items():
         print("{}: {} - {}".format(date, time["from"], time["to"]))

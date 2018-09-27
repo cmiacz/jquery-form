@@ -10,7 +10,6 @@ function getFormData() {
     return data;
 }
 
-
 $(document).ready(function() {
     $("form").submit(function(e){
         var form = $(this);
